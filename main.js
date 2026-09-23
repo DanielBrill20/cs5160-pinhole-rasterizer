@@ -3,7 +3,10 @@ import {shapes} from "./shapes.js";
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-let camera = {x: 0, y: 0, z: -10};
+let camera = {x: 0, y: 3, z: -10};
+const cameraStart = {...camera};
+let projectionScale = canvas.height;
+const travelStep = .4;
 
 function drawLine(x1, y1, x2, y2)
 {
@@ -18,58 +21,72 @@ function drawLine(x1, y1, x2, y2)
 
 function drawShape(vertices, edges)
 {
-    ctx.fillStyle = "#050510";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const nearZ = 0.001;
+    let relativeVerts = [];
 
-    let projectedV = [];
-
-    for(let v = 0; v < vertices.length; v++) {
-        let relativePos = {};
-        relativePos.x = vertices[v].x - camera.x;
-        relativePos.y = vertices[v].y - camera.y;
-        relativePos.z = vertices[v].z - camera.z;
-
-        let canvasPos = {};
-        canvasPos.u = relativePos.x/relativePos.z;
-        canvasPos.v = relativePos.y/relativePos.z;
-
-        canvasPos.u = canvasPos.u * canvas.width + canvas.width/2;
-        canvasPos.v = canvasPos.v * canvas.height + canvas.height/2;
-
-        projectedV.push(canvasPos);
+    for(let vert = 0; vert < vertices.length; vert++) {
+        relativeVerts.push({
+            x: vertices[vert].x - camera.x,
+            y: vertices[vert].y - camera.y,
+            z: vertices[vert].z - camera.z
+        });
     }
 
-    for(let e = 0; e < edges.length; e++){
-        
-        let e1 = edges[e][0];
-        let u1 = projectedV[e1].u;
-        let v1 = canvas.height - projectedV[e1].v;
+    for(let edge = 0; edge < edges.length; edge++) {
+        let vert1 = relativeVerts[edges[edge][0]];
+        let vert2 = relativeVerts[edges[edge][1]];
 
-        let e2 = edges[e][1];
-        let u2 = projectedV[e2].u;
-        let v2 = canvas.height - projectedV[e2].v;
+        if (vert1.z < nearZ && vert2.z < nearZ) {
+            continue;
+        }
+
+        if (vert1.z < nearZ || vert2.z < nearZ) {
+            let t = (nearZ - vert1.z) / (vert2.z - vert1.z);
+
+            let intersection = {
+                x: vert1.x + t * (vert2.x - vert1.x),
+                y: vert1.y + t * (vert2.y - vert1.y),
+                z: nearZ
+            };
+
+            if (vert1.z < nearZ) {
+                vert1 = intersection;
+            } else {
+                vert2 = intersection;
+            }
+        }
+
+        let u1 = (vert1.x / vert1.z) * projectionScale + canvas.width/2;
+        let v1 = canvas.height/2 - (vert1.y / vert1.z) * projectionScale;
+        let u2 = (vert2.x / vert2.z) * projectionScale + canvas.width/2;
+        let v2 = canvas.height/2 - (vert2.y / vert2.z) * projectionScale;
 
         drawLine(u1, v1, u2, v2);
-    }
+    }    
 }
 
 function drawShapeAt(shape, position, scale)
 {
-    let newV = [];
+    let newVerts = [];
     for (let v = 0; v < shape.vertices.length; v++) {
-        let newPos = {};
-        newPos.x = shape.vertices[v].x * scale + position.x;
-        newPos.y = shape.vertices[v].y * scale + position.y;
-        newPos.z = shape.vertices[v].z * scale + position.z;
-        newV.push(newPos);
+        newVerts.push({
+            x: shape.vertices[v].x * scale + position.x,
+            y: shape.vertices[v].y * scale + position.y,
+            z: shape.vertices[v].z * scale + position.z
+        });
     }
 
-    drawShape(newV, shape.edges);
+    drawShape(newVerts, shape.edges);
 }
 
 function draw()
 {
+    ctx.fillStyle = "#050510";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
     drawShapeAt(shapes.cube, {x: 0, y: 0, z: 0}, 2);
+    drawShapeAt(shapes.cube, {x: -10, y: 0, z: 50}, 1);
+    drawShapeAt(shapes.pyramid4, {x: 5, y: 0, z: 30}, 3);
 }
 
 document.addEventListener("keydown", (event) => {
@@ -77,23 +94,23 @@ document.addEventListener("keydown", (event) => {
 
     switch (event.code) {
     case "ArrowUp":
-        camera.z++;
+        camera.z += travelStep;
         draw();
         break;
     case "ArrowDown":
-        camera.z--;
+        camera.z -= travelStep;
         draw();
         break;
     case "ArrowLeft":
-        camera.x--;
+        camera.x -= travelStep;
         draw();
         break;
     case "ArrowRight":
-        camera.x++;
+        camera.x += travelStep;
         draw();
         break;
     case "KeyR":
-        camera = {x: 0, y: 0, z: -10};
+        camera = {...cameraStart};
         draw();
         break;
     default:
@@ -104,6 +121,7 @@ document.addEventListener("keydown", (event) => {
 function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    projectionScale = canvas.height;
     draw();
 }
 
