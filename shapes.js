@@ -1,15 +1,15 @@
-const cubeV = [ 
-    {x:  1,  y:  1,  z:  1},
-    {x: -1,  y:  1,  z:  1},
-    {x:  1,  y: -1,  z:  1},
-    {x: -1,  y: -1,  z:  1},
-    {x:  1,  y:  1,  z: -1},
-    {x: -1,  y:  1,  z: -1},
-    {x:  1,  y: -1,  z: -1},
-    {x: -1,  y: -1,  z: -1}
+const cubeVerts = [ 
+    {x:  1,  y:  2,  z:  1},
+    {x: -1,  y:  2,  z:  1},
+    {x:  1,  y:  0,  z:  1},
+    {x: -1,  y:  0,  z:  1},
+    {x:  1,  y:  2,  z: -1},
+    {x: -1,  y:  2,  z: -1},
+    {x:  1,  y:  0,  z: -1},
+    {x: -1,  y:  0,  z: -1}
 ];
 
-const cubeE = [
+const cubeEdges = [
     [0, 1],
     [0, 2],
     [0, 4],
@@ -24,15 +24,15 @@ const cubeE = [
     [3, 7],
 ];
 
-const pyramid4V = [
-    {x: -1,  y: -1,  z: -1},
-    {x: -1,  y: -1,  z:  1},
-    {x:  1,  y: -1,  z:  1},
-    {x:  1,  y: -1,  z: -1},
-    {x:  0,  y:  1,  z:  0}
+const pyramid4Verts = [
+    {x: -1,  y:  0,  z: -1},
+    {x: -1,  y:  0,  z:  1},
+    {x:  1,  y:  0,  z:  1},
+    {x:  1,  y:  0,  z: -1},
+    {x:  0,  y:  2,  z:  0}
 ];
 
-const pyramid4E = [
+const pyramid4Edges = [
     [0, 1],
     [1, 2],
     [2, 3],
@@ -43,14 +43,14 @@ const pyramid4E = [
     [3, 4]
 ];
 
-const pyramid3V = [
-    {x: -1,  y: -1,  z: -1},
-    {x:  1,  y: -1,  z: -1},
-    {x: 0,  y: -1,  z:  .732},
-    {x:  0,  y:  1,  z:  0}
+const pyramid3Verts = [
+    {x: -1,  y:  0,  z: -1},
+    {x:  1,  y:  0,  z: -1},
+    {x:  0,  y:  0,  z:  .732},
+    {x:  0,  y:  2,  z:  0}
 ];
 
-const pyramid3E = [
+const pyramid3Edges = [
     [0, 1],
     [1, 2],
     [2, 0],
@@ -60,7 +60,7 @@ const pyramid3E = [
 ];
 
 export const shapes = {
-    cube: {vertices: cubeV, edges: cubeE},
-    pyramid4: {vertices: pyramid4V, edges: pyramid4E},
-    pyramid3: {vertices: pyramid3V, edges: pyramid3E}
+    cube: {vertices: cubeVerts, edges: cubeEdges},
+    pyramid4: {vertices: pyramid4Verts, edges: pyramid4Edges},
+    pyramid3: {vertices: pyramid3Verts, edges: pyramid3Edges}
 };
