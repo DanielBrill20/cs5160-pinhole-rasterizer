@@ -35,35 +35,32 @@ function drawPixelatedLine(u1, v1, u2, v2, color)
     u2 = Math.round(u2);
     v2 = Math.round(v2);
 
-    let x1 = u1;
-    let x2 = u2;
-    let y1 = v1;
-    let y2 = v2;
-    if (u1 > u2) {
-        x1 = u2;
-        y1 = v2;
-        x2 = u1;
-        y2 = v1;
-    }
+    let dx = Math.abs(u2 - u1);
+    let dy = Math.abs(v2 - v1);
+    let sx = u1 < u2 ? 1 : -1;
+    let sy = v1 < v2 ? 1 : -1;
+    let err = dx - dy;
+    let x = u1;
+    let y = v1;
 
-    if (x1 == x2) {
-        for (let y = Math.min(y1, y2); y <= Math.max(y1, y2); y++) {
-            if (x1 >= 0 && x1 < cols && y >= 0 && y < rows) {
-                pixelGrid[x1][y] = color;
-            }
+    while (true) {
+        if (x >= 0 && x < cols && y >= 0 && y < rows) {
+            pixelGrid[x][y] = color;
         }
-        return;
-    }
 
-    let s = (y2 - y1) / (x2 - x1);
-    let v = y1;
-    for (let u = x1; u < x2+1; u++) {
-        let tempV = Math.round(v);
-
-        if (u >= 0 && u < cols && tempV >= 0 && tempV < rows) {
-            pixelGrid[u][tempV] = color; 
+        if (x === u2 && y === v2) {
+            break;
         }
-        v += s;
+
+        const e2 = 2 * err;
+        if (e2 > -dy) {
+            err -= dy;
+            x += sx;
+        }
+        if (e2 < dx) {
+            err += dx;
+            y += sy;
+        }
     }
 }
 
@@ -163,7 +160,7 @@ function drawShapeAt(shape, position, scale, color)
 
 function drawGround()
 {
-    let spacing = (mode == 1) ? 1 : 5;
+    let spacing = (mode == 1) ? 1 : 10;
     for (let x = -100; x < 100; x += spacing) {
         const vert1 = {x: x - camera.x, y: -camera.y, z: -100 - camera.z};
         const vert2 = {x: x - camera.x, y: -camera.y, z: 100 - camera.z};
@@ -228,9 +225,7 @@ function draw()
 {
     if (mode == 2) {
         for (let u = 0; u < cols; u++) {
-            for (let v = 0; v < rows; v++) {
-                pixelGrid[u][v] = backgroundColor;
-            }
+            pixelGrid[u].fill(backgroundColor);
         }
     }
     ctx.fillStyle = "#050510";
