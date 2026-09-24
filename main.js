@@ -19,11 +19,8 @@ function drawLine(x1, y1, x2, y2)
     ctx.stroke();
 }
 
-function drawEdge(vertices, edge) {
+function drawEdge(vert1, vert2) {
     const nearZ = 0.001;
-
-    let vert1 = vertices[edge[0]];
-    let vert2 = vertices[edge[1]];
 
     if (vert1.z < nearZ && vert2.z < nearZ) {
         return;
@@ -66,7 +63,9 @@ function drawShape(vertices, edges)
     }
 
     for(let edge = 0; edge < edges.length; edge++) {
-        drawEdge(relativeVerts, edges[edge]);
+        let vert1 = relativeVerts[edges[edge][0]];
+        let vert2 = relativeVerts[edges[edge][1]];
+        drawEdge(vert1, vert2);
     }
 }
 
