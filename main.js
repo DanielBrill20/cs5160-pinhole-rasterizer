@@ -19,9 +19,42 @@ function drawLine(x1, y1, x2, y2)
     ctx.stroke();
 }
 
+function drawEdge(vertices, edge) {
+    const nearZ = 0.001;
+
+    let vert1 = vertices[edge[0]];
+    let vert2 = vertices[edge[1]];
+
+    if (vert1.z < nearZ && vert2.z < nearZ) {
+        return;
+    }
+
+    if (vert1.z < nearZ || vert2.z < nearZ) {
+        let t = (nearZ - vert1.z) / (vert2.z - vert1.z);
+
+        let intersection = {
+            x: vert1.x + t * (vert2.x - vert1.x),
+            y: vert1.y + t * (vert2.y - vert1.y),
+            z: nearZ
+        };
+
+        if (vert1.z < nearZ) {
+            vert1 = intersection;
+        } else {
+            vert2 = intersection;
+        }
+    }
+
+    let u1 = (vert1.x / vert1.z) * projectionScale + canvas.width/2;
+    let v1 = canvas.height/2 - (vert1.y / vert1.z) * projectionScale;
+    let u2 = (vert2.x / vert2.z) * projectionScale + canvas.width/2;
+    let v2 = canvas.height/2 - (vert2.y / vert2.z) * projectionScale;
+
+    drawLine(u1, v1, u2, v2);
+}
+
 function drawShape(vertices, edges)
 {
-    const nearZ = 0.001;
     let relativeVerts = [];
 
     for(let vert = 0; vert < vertices.length; vert++) {
@@ -33,36 +66,8 @@ function drawShape(vertices, edges)
     }
 
     for(let edge = 0; edge < edges.length; edge++) {
-        let vert1 = relativeVerts[edges[edge][0]];
-        let vert2 = relativeVerts[edges[edge][1]];
-
-        if (vert1.z < nearZ && vert2.z < nearZ) {
-            continue;
-        }
-
-        if (vert1.z < nearZ || vert2.z < nearZ) {
-            let t = (nearZ - vert1.z) / (vert2.z - vert1.z);
-
-            let intersection = {
-                x: vert1.x + t * (vert2.x - vert1.x),
-                y: vert1.y + t * (vert2.y - vert1.y),
-                z: nearZ
-            };
-
-            if (vert1.z < nearZ) {
-                vert1 = intersection;
-            } else {
-                vert2 = intersection;
-            }
-        }
-
-        let u1 = (vert1.x / vert1.z) * projectionScale + canvas.width/2;
-        let v1 = canvas.height/2 - (vert1.y / vert1.z) * projectionScale;
-        let u2 = (vert2.x / vert2.z) * projectionScale + canvas.width/2;
-        let v2 = canvas.height/2 - (vert2.y / vert2.z) * projectionScale;
-
-        drawLine(u1, v1, u2, v2);
-    }    
+        drawEdge(relativeVerts, edges[edge]);
+    }
 }
 
 function drawShapeAt(shape, position, scale)
