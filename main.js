@@ -5,18 +5,80 @@ const ctx = canvas.getContext("2d");
 
 let camera = {x: 0, y: 3, z: -10};
 const cameraStart = {...camera};
-let projectionScale = canvas.height;
 const travelStep = .4;
+let virtualWidth = canvas.width;
+let virtualHeight = canvas.height;
+let projectionScale = virtualHeight;
 
-function drawLine(x1, y1, x2, y2, color)
+let mode = 2;
+const rows = 200;
+const cols = 320;
+const pixelSize = 5;
+const backgroundColor = "#050510";
+const pixelGrid = Array.from({ length: cols }, () => Array(rows).fill(backgroundColor));
+
+function drawPerfectLine(u1, v1, u2, v2, color)
 {
     ctx.lineWidth = 2;
     ctx.strokeStyle = color;
 
     ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
+    ctx.moveTo(u1, v1);
+    ctx.lineTo(u2, v2);
     ctx.stroke();
+}
+
+function drawPixelatedLine(u1, v1, u2, v2, color)
+{
+    u1 = Math.round(u1);
+    v1 = Math.round(v1);
+    u2 = Math.round(u2);
+    v2 = Math.round(v2);
+
+    let x1 = u1;
+    let x2 = u2;
+    let y1 = v1;
+    let y2 = v2;
+    if (u1 > u2) {
+        x1 = u2;
+        y1 = v2;
+        x2 = u1;
+        y2 = v1;
+    }
+
+    if (x1 == x2) {
+        for (let y = Math.min(y1, y2); y <= Math.max(y1, y2); y++) {
+            if (x1 >= 0 && x1 < cols && y >= 0 && y < rows) {
+                pixelGrid[x1][y] = color;
+            }
+        }
+        return;
+    }
+
+    let s = (y2 - y1) / (x2 - x1);
+    let v = y1;
+    for (let u = x1; u < x2+1; u++) {
+        let tempV = Math.round(v);
+
+        if (u >= 0 && u < cols && tempV >= 0 && tempV < rows) {
+            pixelGrid[u][tempV] = color; 
+        }
+        v += s;
+    }
+}
+
+function drawLine(u1, v1, u2, v2, color)
+{
+    switch (mode) {
+        case 1:
+            drawPerfectLine(u1, v1, u2, v2, color);
+            break;
+        case 2:
+            drawPixelatedLine(u1, v1, u2, v2, color);
+            break;
+        default:
+            break;
+    }
 }
 
 function drawEdge(vert1, vert2, color) {
@@ -27,7 +89,13 @@ function drawEdge(vert1, vert2, color) {
     }
 
     if (vert1.z < nearZ || vert2.z < nearZ) {
-        let t = (nearZ - vert1.z) / (vert2.z - vert1.z);
+        const denominator = vert2.z - vert1.z;
+
+        if (Math.abs(denominator) < 1e-9) {
+            return;
+        }
+
+        let t = (nearZ - vert1.z) / denominator;
 
         let intersection = {
             x: vert1.x + t * (vert2.x - vert1.x),
@@ -42,10 +110,20 @@ function drawEdge(vert1, vert2, color) {
         }
     }
 
-    let u1 = (vert1.x / vert1.z) * projectionScale + canvas.width/2;
-    let v1 = canvas.height/2 - (vert1.y / vert1.z) * projectionScale;
-    let u2 = (vert2.x / vert2.z) * projectionScale + canvas.width/2;
-    let v2 = canvas.height/2 - (vert2.y / vert2.z) * projectionScale;
+    const u1 = (vert1.x / vert1.z) * projectionScale + virtualWidth/2;
+    const v1 = virtualHeight/2 - (vert1.y / vert1.z) * projectionScale;
+    const u2 = (vert2.x / vert2.z) * projectionScale + virtualWidth/2;
+    const v2 = virtualHeight/2 - (vert2.y / vert2.z) * projectionScale;
+
+    if (mode === 2) {
+        const gridX1 = (u1 / virtualWidth) * cols;
+        const gridY1 = (v1 / virtualHeight) * rows;
+        const gridX2 = (u2 / virtualWidth) * cols;
+        const gridY2 = (v2 / virtualHeight) * rows;
+
+        drawLine(gridX1, gridY1, gridX2, gridY2, color);
+        return;
+    }
 
     drawLine(u1, v1, u2, v2, color);
 }
@@ -85,7 +163,8 @@ function drawShapeAt(shape, position, scale, color)
 
 function drawGround()
 {
-    for (let x = -100; x < 100; x++) {
+    let spacing = (mode == 1) ? 1 : 5;
+    for (let x = -100; x < 100; x += spacing) {
         const vert1 = {x: x - camera.x, y: -camera.y, z: -100 - camera.z};
         const vert2 = {x: x - camera.x, y: -camera.y, z: 100 - camera.z};
         drawEdge(vert1, vert2, "#0DBD36");
@@ -133,8 +212,27 @@ function generateShapes()
     }
 }
 
+function drawGrid()
+{
+    for (let v = 0; v < rows; v++) {
+        for (let u = 0; u < cols; u++) {
+            if (pixelGrid[u][v] != backgroundColor) {
+                ctx.fillStyle = pixelGrid[u][v];
+                ctx.fillRect(u * pixelSize, v * pixelSize, pixelSize, pixelSize);
+            }
+        }
+    }
+}
+
 function draw()
 {
+    if (mode == 2) {
+        for (let u = 0; u < cols; u++) {
+            for (let v = 0; v < rows; v++) {
+                pixelGrid[u][v] = backgroundColor;
+            }
+        }
+    }
     ctx.fillStyle = "#050510";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -142,6 +240,10 @@ function draw()
 
     for (const shapeData of randShapes) {
         drawShapeAt(shapeData.shape, shapeData.position, shapeData.scale, shapeData.color);
+    }
+
+    if (mode == 2) {
+        drawGrid();
     }
 }
 
@@ -165,6 +267,10 @@ document.addEventListener("keydown", (event) => {
         camera.x += travelStep;
         draw();
         break;
+    case "KeyM":
+        mode = mode == 1 ? 2 : 1;
+        draw();
+        break;
     case "KeyR":
         camera = {...cameraStart};
         draw();
@@ -175,8 +281,16 @@ document.addEventListener("keydown", (event) => {
 });
 
 function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    if (mode === 2) {
+        canvas.width = cols * pixelSize;
+        canvas.height = rows * pixelSize;
+    } else {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    virtualWidth = canvas.width;
+    virtualHeight = canvas.height;
     projectionScale = canvas.height;
     draw();
 }
