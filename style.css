@@ -20,3 +20,17 @@ canvas {
     font-size: 14px;
     line-height: 1.4;
 }
+
+#info h1,
+#info p {
+    margin: 0 0 6px;
+}
+
+#info h1 {
+    font-size: 18px;
+}
+
+#info ul {
+    margin: 0;
+    padding-left: 18px;
+}

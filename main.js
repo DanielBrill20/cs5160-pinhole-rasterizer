@@ -114,7 +114,6 @@ function drawLine(u1, v1, u2, v2, color)
             drawPerfectLine(u1, v1, u2, v2, color);
             break;
         case 2:
-            break;
         case 3:
             drawPixelatedLine(u1, v1, u2, v2, color);
             break;
