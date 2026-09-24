@@ -96,6 +96,43 @@ function drawGround()
     }
 }
 
+let randShapes = [];
+
+function randomBetween(min, max)
+{
+    return min + Math.random() * (max - min);
+}
+
+function randomColor()
+{
+    const r = Math.floor(Math.random() * 256);
+    const g = Math.floor(Math.random() * 256);
+    const b = Math.floor(Math.random() * 256);
+
+    return "#" + [r, g, b].map(value => value.toString(16).padStart(2, "0")).join("");
+}
+
+function generateShapes()
+{
+    randShapes = [];
+    const shapeTypes = Object.values(shapes);
+
+    for (let i = 0; i < 50; i++) {
+        const selectedShape = shapeTypes[Math.floor(Math.random() * shapeTypes.length)];
+
+        randShapes.push({
+            shape: selectedShape,
+            position: {
+                x: randomBetween(-100, 100),
+                y: 0,
+                z: randomBetween(-100, 100)
+            },
+            scale: randomBetween(0.5, 10),
+            color: randomColor()
+        });
+    }
+}
+
 function draw()
 {
     ctx.fillStyle = "#050510";
@@ -103,9 +140,9 @@ function draw()
 
     drawGround();
 
-    drawShapeAt(shapes.cube, {x: 0, y: 0, z: 0}, 2, "#FF0000");
-    drawShapeAt(shapes.cube, {x: -10, y: 0, z: 50}, 1, "#FF0000");
-    drawShapeAt(shapes.pyramid4, {x: 5, y: 0, z: 30}, 3, "#FF0000");
+    for (const shapeData of randShapes) {
+        drawShapeAt(shapeData.shape, shapeData.position, shapeData.scale, shapeData.color);
+    }
 }
 
 document.addEventListener("keydown", (event) => {
@@ -146,4 +183,5 @@ function resizeCanvas() {
 
 
 window.addEventListener("resize", resizeCanvas);
+generateShapes();
 resizeCanvas();
