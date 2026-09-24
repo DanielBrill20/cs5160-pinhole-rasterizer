@@ -8,10 +8,10 @@ const cameraStart = {...camera};
 let projectionScale = canvas.height;
 const travelStep = .4;
 
-function drawLine(x1, y1, x2, y2)
+function drawLine(x1, y1, x2, y2, color)
 {
     ctx.lineWidth = 2;
-    ctx.strokeStyle = "white";
+    ctx.strokeStyle = color;
 
     ctx.beginPath();
     ctx.moveTo(x1, y1);
@@ -19,7 +19,7 @@ function drawLine(x1, y1, x2, y2)
     ctx.stroke();
 }
 
-function drawEdge(vert1, vert2) {
+function drawEdge(vert1, vert2, color) {
     const nearZ = 0.001;
 
     if (vert1.z < nearZ && vert2.z < nearZ) {
@@ -47,10 +47,10 @@ function drawEdge(vert1, vert2) {
     let u2 = (vert2.x / vert2.z) * projectionScale + canvas.width/2;
     let v2 = canvas.height/2 - (vert2.y / vert2.z) * projectionScale;
 
-    drawLine(u1, v1, u2, v2);
+    drawLine(u1, v1, u2, v2, color);
 }
 
-function drawShape(vertices, edges)
+function drawShape(vertices, edges, color)
 {
     let relativeVerts = [];
 
@@ -65,11 +65,11 @@ function drawShape(vertices, edges)
     for(let edge = 0; edge < edges.length; edge++) {
         let vert1 = relativeVerts[edges[edge][0]];
         let vert2 = relativeVerts[edges[edge][1]];
-        drawEdge(vert1, vert2);
+        drawEdge(vert1, vert2, color);
     }
 }
 
-function drawShapeAt(shape, position, scale)
+function drawShapeAt(shape, position, scale, color)
 {
     let newVerts = [];
     for (let v = 0; v < shape.vertices.length; v++) {
@@ -80,7 +80,20 @@ function drawShapeAt(shape, position, scale)
         });
     }
 
-    drawShape(newVerts, shape.edges);
+    drawShape(newVerts, shape.edges, color);
+}
+
+function drawGround()
+{
+    for (let x = -100; x < 100; x++) {
+        const vert1 = {x: x - camera.x, y: -camera.y, z: -100 - camera.z};
+        const vert2 = {x: x - camera.x, y: -camera.y, z: 100 - camera.z};
+        drawEdge(vert1, vert2, "#0DBD36");
+
+        const vert3 = {x: -100 - camera.x, y: -camera.y, z: x - camera.z};
+        const vert4 = {x: 100 - camera.x, y: -camera.y, z: x - camera.z};
+        drawEdge(vert3, vert4, "#0DBD36");
+    }
 }
 
 function draw()
@@ -88,9 +101,11 @@ function draw()
     ctx.fillStyle = "#050510";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    drawShapeAt(shapes.cube, {x: 0, y: 0, z: 0}, 2);
-    drawShapeAt(shapes.cube, {x: -10, y: 0, z: 50}, 1);
-    drawShapeAt(shapes.pyramid4, {x: 5, y: 0, z: 30}, 3);
+    drawGround();
+
+    drawShapeAt(shapes.cube, {x: 0, y: 0, z: 0}, 2, "#FF0000");
+    drawShapeAt(shapes.cube, {x: -10, y: 0, z: 50}, 1, "#FF0000");
+    drawShapeAt(shapes.pyramid4, {x: 5, y: 0, z: 30}, 3, "#FF0000");
 }
 
 document.addEventListener("keydown", (event) => {
