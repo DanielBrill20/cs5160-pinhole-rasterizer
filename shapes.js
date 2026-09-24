@@ -90,8 +90,52 @@ const pyramid3Triangles = [
     [0, 1, 2]
 ];
 
+const octahedronVerts = [
+    {x:  0, y: 2, z:  0},
+    {x:  1, y: 1, z:  0},
+    {x:  0, y: 1, z:  1},
+    {x: -1, y: 1, z:  0},
+    {x:  0, y: 1, z: -1},
+    {x:  0, y: 0, z:  0}
+];
+
+const octahedronEdges = [
+    [0, 1], [0, 2], [0, 3], [0, 4],
+    [1, 2], [2, 3], [3, 4], [4, 1],
+    [5, 1], [5, 2], [5, 3], [5, 4]
+];
+
+const octahedronTriangles = [
+    [0, 1, 2], [0, 2, 3], [0, 3, 4], [0, 4, 1],
+    [5, 2, 1], [5, 3, 2], [5, 4, 3], [5, 1, 4]
+];
+
+const prismVerts = [
+    {x: -1, y: 0, z: -1},
+    {x:  1, y: 0, z: -1},
+    {x:  0, y: 2, z: -1},
+    {x: -1, y: 0, z:  1},
+    {x:  1, y: 0, z:  1},
+    {x:  0, y: 2, z:  1}
+];
+
+const prismEdges = [
+    [0, 1], [1, 2], [2, 0],
+    [3, 4], [4, 5], [5, 3],
+    [0, 3], [1, 4], [2, 5]
+];
+
+const prismTriangles = [
+    [0, 1, 2], [3, 5, 4],
+    [0, 3, 4], [0, 4, 1],
+    [1, 4, 5], [1, 5, 2],
+    [2, 5, 3], [2, 3, 0]
+];
+
 export const shapes = {
     cube: {vertices: cubeVerts, edges: cubeEdges, triangles: cubeTriangles},
     pyramid4: {vertices: pyramid4Verts, edges: pyramid4Edges, triangles: pyramid4Triangles},
-    pyramid3: {vertices: pyramid3Verts, edges: pyramid3Edges, triangles: pyramid3Triangles}
+    pyramid3: {vertices: pyramid3Verts, edges: pyramid3Edges, triangles: pyramid3Triangles},
+    octahedron: {vertices: octahedronVerts, edges: octahedronEdges, triangles: octahedronTriangles},
+    prism: {vertices: prismVerts, edges: prismEdges, triangles: prismTriangles}
 };
