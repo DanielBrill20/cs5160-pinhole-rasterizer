@@ -22,6 +22,7 @@ This repo was built for Project 1 of CS 5160, Computer Graphics. It features an 
   - [Manual Line Rasterization](#manual-line-rasterization)
   - [Triangle Drawing](#triangle-drawing)
   - [Depth Buffer and Visible Surface Testing](#depth-buffer-and-visible-surface-testing)
+- [AI Usage](#ai-usage)
 - [Future Improvements](#future-improvements)
 
 ## Try It!
@@ -86,6 +87,12 @@ The function for barycentric interpolation checks whether a point lies inside th
 The triangle mode also uses a depth buffer to determine which parts of the scene are visible. Each raster pixel stores the closest depth value seen so far, and any new pixel only overwrites it if it is closer to the camera. This is the implementation of the z-buffer algorithm, one of the standard approaches used in real graphics pipelines.
 
 This is especially relevant to the course because it directly connects to the topic of hidden-surface removal. Even if two triangles occupy the same screen position, the one with the smaller depth is the visible one.
+
+## AI Usage
+
+I sped up development by using AI to generate a few additional shapes, specifically the octahedron and triangular prism. I also used AI to quickly create the vertices for triangular faces in `./shapes.js`. This eliminated the need for me to manually calculate everything, but I ensured I understood the concepts by doing the cube and pyramids manually.
+
+Also, for the `triangle view`, I originally coded the shapes to take on the same randomly generated colors as their wireframe counterparts. However, I didn't like that the faces all blended together, and it was hard to distinguish between different sides of the shapes due to lack of shadows. As a quick fix, I prompted AI to make the faces different colors. It quickly generated some random color shift logic that I used, as it was not the focus of this project. Its original implementation randomly shifted the color of each triangle, so I adjusted it to ensure that triangles of a single face are one solid color.
 
 ## Future Improvements
 
